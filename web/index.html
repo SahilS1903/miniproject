@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <!--
+  <head>
+    <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
@@ -14,25 +14,163 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
+    <base href="$FLUTTER_BASE_HREF" />
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+    <meta charset="UTF-8" />
+    <meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+    <meta name="description" content="A new Flutter project." />
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="bot_detection_app">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+    <!-- iOS meta tags & icons -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="miniproject" />
+    <link rel="apple-touch-icon" href="icons/Icon-192.png" />
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>bot_detection_app</title>
-  <link rel="manifest" href="manifest.json">
-</head>
-<body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <title>Bot Detection App</title>
+    <link rel="manifest" href="manifest.json" />
+
+    <script>
+      // The value below is injected by flutter build, do not touch.
+      var serviceWorkerVersion = null;
+    </script>
+    <!-- This script adds the flutter initialization JS code -->
+    <script src="flutter.js" defer></script>
+
+    <!-- Add script for handling CSV data on web -->
+    <script>
+      // Function to handle CSV data processing
+      function processCSVData(csvData, datasetType, algorithm) {
+        return new Promise((resolve) => {
+          // This is a simulation for web
+          // In a real app, you'd send this to your backend
+
+          // Simple simulation - returns mock data for the specific algorithm
+          setTimeout(() => {
+            const mockResults = {
+              random_forest: {
+                predictions: Array(100)
+                  .fill()
+                  .map((_, i) => i % 2),
+                counts: {
+                  0: 45,
+                  1: 55,
+                },
+                accuracy: 0.92,
+                actual_counts: {
+                  0: 48,
+                  1: 52,
+                },
+              },
+              xgboost: {
+                predictions: Array(100)
+                  .fill()
+                  .map((_, i) => i % 2),
+                counts: {
+                  0: 42,
+                  1: 58,
+                },
+                accuracy: 0.87,
+                actual_counts: {
+                  0: 48,
+                  1: 52,
+                },
+              },
+              svm: {
+                predictions: Array(100)
+                  .fill()
+                  .map((_, i) => i % 2),
+                counts: {
+                  0: 50,
+                  1: 50,
+                },
+                accuracy: 0.78,
+                actual_counts: {
+                  0: 48,
+                  1: 52,
+                },
+              },
+              knn: {
+                predictions: Array(100)
+                  .fill()
+                  .map((_, i) => i % 2),
+                counts: {
+                  0: 47,
+                  1: 53,
+                },
+                accuracy: 0.82,
+                actual_counts: {
+                  0: 48,
+                  1: 52,
+                },
+              },
+              logistic_regression: {
+                predictions: Array(100)
+                  .fill()
+                  .map((_, i) => i % 2),
+                counts: {
+                  0: 44,
+                  1: 56,
+                },
+                accuracy: 0.76,
+                actual_counts: {
+                  0: 48,
+                  1: 52,
+                },
+              },
+            };
+
+            // Add some variability based on dataset type
+            if (datasetType === "iot23") {
+              // For IOT-23, adjust accuracy slightly
+              Object.keys(mockResults).forEach((key) => {
+                mockResults[key].accuracy = Math.min(
+                  0.98,
+                  mockResults[key].accuracy + 0.03
+                );
+                // Also tweak the counts slightly
+                mockResults[key].counts = {
+                  0: mockResults[key].counts["0"] - 2,
+                  1: mockResults[key].counts["1"] + 2,
+                };
+              });
+            }
+
+            // Return only the requested algorithm's results - use result object instead of direct return
+            resolve(mockResults[algorithm] || mockResults.random_forest);
+          }, 1500); // Simulate processing time
+        });
+      }
+
+      // Register the function to be accessible from Dart
+      window.processCSVFromDart = function (csvString, datasetType, algorithm) {
+        console.log(
+          "JS function called with dataset:",
+          datasetType,
+          "algorithm:",
+          algorithm
+        );
+        return processCSVData(csvString, datasetType, algorithm);
+      };
+    </script>
+  </head>
+  <body>
+    <script>
+      window.addEventListener("load", function (ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          serviceWorker: {
+            serviceWorkerVersion: serviceWorkerVersion,
+          },
+          onEntrypointLoaded: function (engineInitializer) {
+            engineInitializer.initializeEngine().then(function (appRunner) {
+              appRunner.runApp();
+            });
+          },
+        });
+      });
+    </script>
+  </body>
 </html>

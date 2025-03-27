@@ -153,28 +153,40 @@ class _DatasetSelectionScreenState extends State<DatasetSelectionScreen>
                     opacity: _fadeInAnimation,
                     child: SlideTransition(
                       position: _slideAnimation,
-                      child: GridView.count(
-                        crossAxisCount: 1,
-                        mainAxisSpacing: 20,
-                        childAspectRatio: 1.8,
-                        children: [
-                          _buildDatasetCard(
-                            context,
-                            'CTU-13 Dataset',
-                            'A comprehensive network traffic dataset containing botnet and normal traffic patterns. Ideal for initial analysis.',
-                            Icons.security,
-                            [AppTheme.primaryColor, AppTheme.secondaryColor],
-                            () => _navigateToMLModulesScreen(context, 'CTU-13'),
+                      child:Center(
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 1500),
+                          width: double.infinity,
+                          child: GridView.count(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 20,
+                            mainAxisSpacing: 20,
+                            childAspectRatio: 2,
+                            children: [
+                              _buildDatasetCard(
+                                context,
+                                'CTU-13 Dataset',
+                                'A comprehensive network traffic dataset containing botnet and normal traffic patterns. Ideal for botnet detection and analysis.',
+                                Icons.security,
+                                [
+                                  AppTheme.primaryColor,
+                                  AppTheme.secondaryColor
+                                ],
+                                () => _navigateToMLModulesScreen(
+                                    context, 'CTU-13'),
+                              ),
+                              _buildDatasetCard(
+                                context,
+                                'IOT-23 Dataset',
+                                'IoT network traffic dataset with detailed flow information for detecting botnet activities in IoT environments.',
+                                Icons.wifi,
+                                [AppTheme.secondaryColor, AppTheme.accentColor],
+                                () => _navigateToMLModulesScreen(
+                                    context, 'IOT-23'),
+                              ),
+                            ],
                           ),
-                          _buildDatasetCard(
-                            context,
-                            'CTU-14 Dataset',
-                            'Advanced botnet traffic analysis dataset with detailed network flow information and labeled activities.',
-                            Icons.analytics,
-                            [AppTheme.secondaryColor, AppTheme.accentColor],
-                            () => _navigateToMLModulesScreen(context, 'CTU-14'),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -206,6 +218,8 @@ class _DatasetSelectionScreenState extends State<DatasetSelectionScreen>
             onTap: onPressed,
             borderRadius: BorderRadius.circular(16),
             child: Container(
+              width: double.infinity,
+              constraints: const BoxConstraints(maxWidth: 500),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(16),
                 gradient: LinearGradient(
@@ -256,7 +270,7 @@ class _DatasetSelectionScreenState extends State<DatasetSelectionScreen>
                             color: gradientColors[0],
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                         Text(
                           title,
                           style:
@@ -264,31 +278,32 @@ class _DatasetSelectionScreenState extends State<DatasetSelectionScreen>
                                     color: gradientColors[0],
                                   ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          description,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                        const SizedBox(height: 12),
+                        Expanded(
+                          child: Text(
+                            description,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        const Spacer(),
+                        const SizedBox(height: 12),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text(
-                              'Select Dataset',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    color: gradientColors[0],
-                                  ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.arrow_forward,
-                              size: 16,
-                              color: gradientColors[0],
+                            ElevatedButton(
+                              onPressed: onPressed,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: gradientColors[0],
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24.0,
+                                  vertical: 12.0,
+                                ),
+                              ),
+                              child: const Text('Select'),
                             ),
                           ],
                         ),
@@ -307,19 +322,10 @@ class _DatasetSelectionScreenState extends State<DatasetSelectionScreen>
   void _navigateToMLModulesScreen(BuildContext context, String dataset) {
     Navigator.push(
       context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            MLModulesScreen(dataset: dataset),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOutCubic;
-          var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          var offsetAnimation = animation.drive(tween);
-          return SlideTransition(position: offsetAnimation, child: child);
-        },
-        transitionDuration: const Duration(milliseconds: 500),
+      MaterialPageRoute(
+        builder: (context) => MLModulesScreen(
+          dataset: dataset,
+        ),
       ),
     );
   }
