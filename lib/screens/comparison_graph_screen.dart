@@ -19,6 +19,13 @@ class ComparisonGraphScreen extends StatelessWidget {
     final result = predictionResults[modelName];
 
     final bool hasActualCounts = result.containsKey('actual_counts');
+    final List<dynamic> infectedIps = result['infected_ips'] ?? [];
+    final List<dynamic> uniqueInfectedSources =
+        result['unique_infected_sources'] ?? [];
+
+    // Debug print to verify the data
+    print('DEBUG - uniqueInfectedSources: $uniqueInfectedSources');
+    print('DEBUG - Full result: $result');
 
     // Get the maximum value for the y-axis
     double maxY = 0;
@@ -66,6 +73,42 @@ class ComparisonGraphScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Debug card to directly show the unique infected sources
+              Card(
+                color: Colors.red.shade900,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'DEBUG - Unique Infected Sources (${uniqueInfectedSources.length}):',
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        uniqueInfectedSources.isEmpty
+                            ? 'No unique infected sources found'
+                            : uniqueInfectedSources.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
               // Header with dataset info
               Card(
                 color: AppTheme.cardDark,
@@ -139,6 +182,134 @@ class ComparisonGraphScreen extends StatelessWidget {
                               ),
                             ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Unique Infected Source IPs section moved to the top for visibility
+              Card(
+                color: AppTheme.cardDark,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Unique Infected Source IPs',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppTheme.accentColor.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              '${uniqueInfectedSources.length} Sources',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppTheme.accentColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: AppTheme.backgroundDark.withOpacity(0.5),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppTheme.accentColor.withOpacity(0.3),
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: uniqueInfectedSources.isEmpty
+                            ? const Text(
+                                'No unique infected sources found',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              )
+                            : Builder(
+                                builder: (context) {
+                                  try {
+                                    return Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: uniqueInfectedSources
+                                          .map<Widget>((ip) {
+                                        try {
+                                          return Chip(
+                                            backgroundColor: AppTheme
+                                                .accentColor
+                                                .withOpacity(0.15),
+                                            side: BorderSide(
+                                              color: AppTheme.accentColor
+                                                  .withOpacity(0.3),
+                                            ),
+                                            label: Text(
+                                              ip.toString(),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            avatar: const Icon(
+                                              Icons.warning_rounded,
+                                              color: Colors.amber,
+                                              size: 16,
+                                            ),
+                                          );
+                                        } catch (e) {
+                                          print('ERROR on individual chip: $e');
+                                          return Chip(
+                                            backgroundColor:
+                                                Colors.red.shade900,
+                                            label: Text(
+                                              'Error: $e',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }).toList(),
+                                    );
+                                  } catch (e) {
+                                    print('ERROR on Wrap widget: $e');
+                                    return Text(
+                                      'Error displaying infected sources: $e',
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                       ),
                     ],
                   ),
@@ -434,6 +605,98 @@ class ComparisonGraphScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ],
+
+                      const SizedBox(height: 16),
+
+                      // Infected IPs table
+                      if (infectedIps.isNotEmpty) ...[
+                        const Divider(color: Colors.white24),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Infected IP Addresses',
+                          style:
+                              Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Colors.white70,
+                                  ),
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: AppTheme.backgroundDark.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: AppTheme.accentColor.withOpacity(0.3),
+                            ),
+                          ),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: DataTable(
+                              headingRowColor: MaterialStateProperty.all(
+                                AppTheme.accentColor.withOpacity(0.1),
+                              ),
+                              columnSpacing: 40,
+                              columns: const [
+                                DataColumn(
+                                  label: Text(
+                                    'Source IP',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Text(
+                                    'Destination IP',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                              rows: List.generate(
+                                infectedIps.length > 100
+                                    ? 100 // Limit to 100 IPs to prevent performance issues
+                                    : infectedIps.length,
+                                (index) => DataRow(
+                                  cells: [
+                                    DataCell(
+                                      Text(
+                                        infectedIps[index]['src'] ?? 'N/A',
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      Text(
+                                        infectedIps[index]['dst'] ?? 'N/A',
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (infectedIps.length > 100)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              'Showing 100 of ${infectedIps.length} infected IPs',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: Colors.white70,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                       ],
 
                       const SizedBox(height: 16),

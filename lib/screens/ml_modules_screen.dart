@@ -254,7 +254,23 @@ class _MLModulesScreenState extends State<MLModulesScreen>
 
           Map<String, dynamic> results;
           try {
+            _appendToConsole('Parsing JSON result: $jsonLine');
             results = json.decode(jsonLine);
+
+            // Debug print to verify the structure
+            _appendToConsole('JSON parsed successfully');
+            _appendToConsole('Keys in result: ${results.keys.toList()}');
+
+            // Check for unique_infected_sources key specifically
+            if (results.containsKey('unique_infected_sources')) {
+              _appendToConsole(
+                  'Found unique_infected_sources key with ${results['unique_infected_sources'].length} items');
+              _appendToConsole(
+                  'Contents: ${results['unique_infected_sources']}');
+            } else {
+              _appendToConsole(
+                  'WARNING: unique_infected_sources key not found in results');
+            }
           } catch (e) {
             _appendToConsole('Failed to parse JSON: $jsonLine');
             throw Exception('Failed to parse prediction results: $e');
@@ -264,6 +280,11 @@ class _MLModulesScreenState extends State<MLModulesScreen>
 
           // Create a map with the selected algorithm as key
           final formattedResults = {_selectedAlgorithm!: results};
+
+          // Debug output before navigation
+          _appendToConsole(
+              'Final results structure being passed to ComparisonGraphScreen:');
+          _appendToConsole(json.encode(formattedResults));
 
           Navigator.push(
             context,
